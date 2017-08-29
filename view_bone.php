@@ -1,9 +1,21 @@
 <?php
 ini_set('display_errors', 'On');
-$mysqli = new mysqli("localhost","root","root","bone_db");
-if($mysqli->connect_errno){
-	echo "Connection error " . $mysqli->connect_errno . " " . $mysqli->connect_error;
-	}
+$host 	= 'localhost';
+$db 	= 'bone_db';
+$user 	= 'root';
+$pass 	= 'root';
+$charset = 'utf8';
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$opt = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+try {
+	$pdo = new PDO($dsn, $user, $pass, $opt);
+} catch (PDOException $e) {
+	echo "Connection error: " . $e->getMessage();
+}
 ?>
 
 
@@ -42,6 +54,8 @@ if($mysqli->connect_errno){
 	</ul>
 <br />
 
+
+
 <h3>Search Bones</h3>
 <div>
 	<form method="post" action="view_bone.php">
@@ -51,40 +65,22 @@ if($mysqli->connect_errno){
 					<select name="BoneNumber">
 						<option value=0>All Bones</option>
 						<?php
-						if(!($stmt = $mysqli->prepare("SELECT bone_number FROM bone"))){
-							echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+						$stmt = $pdo->prepare("SELECT bone_number FROM bone");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . '</option>\n';
 						}
-
-						if(!$stmt->execute()){
-							echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						if(!$stmt->bind_result($bone_number)){
-							echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						while($stmt->fetch()){
-							echo '<option value="'. $bone_number . '"> ' . '# ' . $bone_number . '</option>\n';
-						}
-						$stmt->close();
 						?>
 					</select></p>
 				<p>Bone Type:
 					<select name="BoneType">
 						<option value=0>All Types</option>
 						<?php
-						if(!($stmt = $mysqli->prepare("SELECT bone_type FROM bone"))){
-							echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+						$stmt = $pdo->prepare("SELECT bone_type FROM bone");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
 						}
-
-						if(!$stmt->execute()){
-							echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						if(!$stmt->bind_result($bone_type)){
-							echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						while($stmt->fetch()){
-							echo '<option value="'. $bone_type . '"> ' . $bone_type . '</option>\n';
-						}
-						$stmt->close();
 						?>
 					</select></p>
 					<p>Bone Side: 
@@ -100,23 +96,14 @@ if($mysqli->connect_errno){
 							<option value='F'>F</option>
 						</select></p>
 				<p>Bone Provenance:
-					<select name="BoneProvenance">
+					<select name="BagProvenance">
 						<option value=0>All Provenances</option>
 						<?php
-						if(!($stmt = $mysqli->prepare("SELECT bag_provenance FROM bag"))){
-							echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+						$stmt = $pdo->prepare("SELECT bag_provenance FROM bag");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['bag_provenance'] . '"> ' . $row['bag_provenance'] . '</option>\n';
 						}
-
-						if(!$stmt->execute()){
-							echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						if(!$stmt->bind_result($bag_provenance)){
-							echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						while($stmt->fetch()){
-							echo '<option value="'. $bag_provenance . '"> ' . $bag_provenance . '</option>\n';
-						}
-						$stmt->close();
 						?>
 					</select></p>
 		</fieldset>
@@ -148,173 +135,55 @@ if($mysqli->connect_errno){
 <?php
 $qry = "SELECT bone.bone_number, bone.bone_type, bone.side, bone.sex, bag.bag_number, box.box_number, bag.bag_provenance FROM bone JOIN bone_bag ON bone.bone_id = bone_bag.bone_id JOIN bag ON bone_bag.bag_id = bag.bag_id JOIN bag_box ON bag_box.bag_id = bag.bag_id JOIN box ON box.box_id = bag_box.box_id WHERE bone.bone_id IS NOT NULL ";
 
+
 if(!(empty($_POST['BoneNumber']))){
-	$qry .= "AND bone.bone_number = ? ";
+	$qry .= "AND bone.bone_number = :boneNumber ";
 }
 if(!(empty($_POST['BoneType']))){
-	$qry .= "AND bone.bone_type = ? ";
+	$qry .= "AND bone.bone_type = :boneType ";
 }
 if(!(empty($_POST['BoneSide']))){
-	$qry .= "AND bone.side = ? ";
+	$qry .= "AND bone.side = :boneSide ";
 }
 if(!(empty($_POST['BoneSex']))){
-	$qry .= "AND bone.sex = ? ";
+	$qry .= "AND bone.sex = :boneSex ";
 }
 if(!(empty($_POST['BagProvenance']))){
-	$qry .= "AND bag.bag_provenance = ? ";
+	$qry .= "AND bag.bag_provenance = :bagProvenance ";
 }
 
-
-if(!($stmt = $mysqli->prepare($qry))){
-	echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
-}
-
-
-//To do: clean up
-//All params
-if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex'])) && !(empty($_POST['BagProvenance']))
-	){
-	if(!($stmt->bind_param("issss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSide'],$_POST['BoneSex'],$_POST['BagProvenance']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-//1 param missing
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("isss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSide'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BagProvenance']))
-	){
-	if(!($stmt->bind_param("isss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSide'],$_POST['BagProvenance']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType'])) && !(empty($_POST['BoneSex'])) && !(empty($_POST['BagProvenance']))
-	){
-	if(!($stmt->bind_param("isss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSex'],$_POST['BagProvenance']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex'])) && !(empty($_POST['BagProvenance']))
-	){
-	if(!($stmt->bind_param("isss",$_POST['BoneNumber'],$_POST['BoneSide'],$_POST['BoneSex'],$_POST['BagProvenance']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex'])) && !(empty($_POST['BagProvenance']))
-	){
-	if(!($stmt->bind_param("ssss",$_POST['BoneType'],$_POST['BoneSide'],$_POST['BoneSex'],$_POST['BagProvenance']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-//2 param missing
-//*** BEGIN HERE: 1 2 missing, 1 3, 1 4... ***
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide']))
-	){
-	if(!($stmt->bind_param("iss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSide']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("iss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("iss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("sss",$_POST['BoneNumber'],$_POST['BoneType'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-//3 param missing
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneType']))
-	){
-	if(!($stmt->bind_param("is",$_POST['BoneNumber'],$_POST['BoneType']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneSide']))
-	){
-	if(!($stmt->bind_param("is",$_POST['BoneNumber'],$_POST['BoneSide']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("is",$_POST['BoneNumber'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneType'])) && !(empty($_POST['BoneSide']))
-	){
-	if(!($stmt->bind_param("ss",$_POST['BoneType'],$_POST['BoneSide']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneType'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("ss",$_POST['BoneType'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneSide'])) && !(empty($_POST['BoneSex']))
-	){
-	if(!($stmt->bind_param("ss",$_POST['BoneSide'],$_POST['BoneSex']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-//4 param missing
-else if(!(empty($_POST['BoneNumber']))){
-	if(!($stmt->bind_param("i",$_POST['BoneNumber']))
-	){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneType']))){
-	if(!($stmt->bind_param("s",$_POST['BoneType']))
-	){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneSide']))){
-	if(!($stmt->bind_param("s",$_POST['BoneSide']))
-	){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['BoneSex']))){
-	if(!($stmt->bind_param("s",$_POST['BoneSex']))
-	){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
+$stmt = $pdo->prepare($qry);
 
 
 
 
 
-if(!$stmt->execute()){
-	echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
+
+if(!(empty($_POST['BoneNumber']))){
+	$stmt->bindParam(':boneNumber', $_POST['BoneNumber']);
 }
-if(!$stmt->bind_result($bone_number, $bone_type, $bone_side, $bone_sex, $bag_number, $box_number, $provenance)){
-	echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
+if(!(empty($_POST['BoneType']))){
+	$stmt->bindParam(':boneType', $_POST['BoneType']);
+}
+if(!(empty($_POST['BoneSide']))){
+	$stmt->bindParam(':boneSide', $_POST['BoneSide']);
+}
+if(!(empty($_POST['BoneSex']))){
+	$stmt->bindParam(':boneSex', $_POST['BoneSex']);
+}
+if(!(empty($_POST['BagProvenance']))){
+	$stmt->bindParam(':bagProvenance', $_POST['BagProvenance']);
 }
 
 
+$stmt->execute();
 
-while($stmt->fetch()){
- echo "<tr>\n<td>\n" . $bone_number . "\n</td>\n<td>\n" . $bone_type . "\n</td>\n<td>\n" . $bone_side . "\n</td>\n<td>\n" . $bone_sex . "\n</td>\n<td>\n" . $bag_number . "\n</td>\n<td>\n" . $box_number . "\n</td>\n<td>\n" . $provenance . "\n</td>\n</tr>";
+
+
+while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['sex'] . "\n</td>\n<td>\n" . $row['bag_number'] . "\n</td>\n<td>\n" . $row['box_number'] . "\n</td>\n<td>\n" . $row['bag_provenance'] . "\n</td>\n</tr>";
 }
-$stmt->close();
+
 ?>
 	</table>
 </div>
