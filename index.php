@@ -5,28 +5,31 @@
 	<title>Bones</title>
 	</head>
 	<body>
-		<h2>Paige is the coolest</h2>
+		<h2>Bone Database</h2>
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
 		</li>
 		<li>
-			<a href="view_bone.php">View Bones</a>
+			<a href="manage.php">Manage</a>
 		</li>
 		<li>
 			<a href="view_ancestry.php">View Ancestry</a>
 		</li>
 		<li>
-			<a href="view_picture.php">View Pictures</a>
+			<a href="view_age.php">View Age</a>
+		</li>
+		<li>
+			<a href="view_bone.php">View Bones</a>
 		</li>
 		<li>
 			<a href="view_individual.php">View Individuals</a>
 		</li>
 		<li>
-			<a href="view_sample.php">View Samples</a>
+			<a href="view_picture.php">View Pictures</a>
 		</li>
 		<li>
-			<a href="view_age.php">View Age</a>
+			<a href="view_sample.php">View Samples</a>
 		</li>
 	</ul>
 	</body>

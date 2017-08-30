@@ -1,9 +1,21 @@
 <?php
 ini_set('display_errors', 'On');
-$mysqli = new mysqli("localhost","root","root","bone_db");
-if($mysqli->connect_errno){
-	echo "Connection error " . $mysqli->connect_errno . " " . $mysqli->connect_error;
-	}
+$host 	= 'localhost';
+$db 	= 'bone_db';
+$user 	= 'root';
+$pass 	= 'root';
+$charset = 'utf8';
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$opt = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
+try {
+	$pdo = new PDO($dsn, $user, $pass, $opt);
+} catch (PDOException $e) {
+	echo "Connection error: " . $e->getMessage();
+}
 ?>
 
 
@@ -16,28 +28,31 @@ if($mysqli->connect_errno){
 	<title>Bones</title>
 	</head>
 	<body>
-		<h2>Paige is the coolest</h2>
+		<h2>Bone Database</h2>
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
 		</li>
 		<li>
-			<a href="view_bone.php">View Bones</a>
+			<a href="manage.php">Manage</a>
 		</li>
 		<li>
 			<a href="view_ancestry.php">View Ancestry</a>
 		</li>
 		<li>
-			<a href="view_picture.php">View Pictures</a>
+			<a href="view_age.php">View Age</a>
+		</li>
+		<li>
+			<a href="view_bone.php">View Bones</a>
 		</li>
 		<li>
 			<a href="view_individual.php">View Individuals</a>
 		</li>
 		<li>
-			<a href="view_sample.php">View Samples</a>
+			<a href="view_picture.php">View Pictures</a>
 		</li>
 		<li>
-			<a href="view_age.php">View Age</a>
+			<a href="view_sample.php">View Samples</a>
 		</li>
 	</ul>
 <br />
@@ -51,40 +66,22 @@ if($mysqli->connect_errno){
 					<select name="BoneNumber">
 						<option value=0>All Bones</option>
 						<?php
-						if(!($stmt = $mysqli->prepare("SELECT bone_number FROM bone"))){
-							echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+						$stmt = $pdo->prepare("SELECT bone_number FROM bone");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . '</option>\n';
 						}
-
-						if(!$stmt->execute()){
-							echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						if(!$stmt->bind_result($bone_number)){
-							echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						while($stmt->fetch()){
-							echo '<option value="'. $bone_number . '"> ' . '# ' . $bone_number . '</option>\n';
-						}
-						$stmt->close();
 						?>
 					</select></p>
 				<p>Individual Number:
 					<select name="IndividualNumber">
 						<option value=0>All Individuals</option>
 						<?php
-						if(!($stmt = $mysqli->prepare("SELECT individual_id FROM individual"))){
-							echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+						$stmt = $pdo->prepare("SELECT individual_id FROM individual");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['individual_id'] . '"> ' . $row['individual_id'] . '</option>\n';
 						}
-
-						if(!$stmt->execute()){
-							echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						if(!$stmt->bind_result($individual_number)){
-							echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-						}
-						while($stmt->fetch()){
-							echo '<option value="'. $individual_number . '"> ' . '# ' . $individual_number . '</option>\n';
-						}
-						$stmt->close();
 						?>
 					</select></p>
 		</fieldset>
@@ -102,68 +99,40 @@ if($mysqli->connect_errno){
 <div>
 	<table>
 		<tr>
-			<td><strong>Bones</strong></td>
-		</tr>
-		<tr>
-			<td>Bone#</td>
-			<td>Individual#</td>
+			<th>Bone#</th>
+			<th>Individual#</th>
 		</tr>
 <?php
 $qry = "SELECT bone.bone_number, individual.individual_id FROM bone JOIN bone_individual ON bone_individual.bone_id = bone.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
 
 if(!(empty($_POST['BoneNumber']))){
-	$qry .= "AND bone.bone_number = ? ";
+	$qry .= "AND bone.bone_number = :boneNumber ";
 }
 if(!(empty($_POST['IndividualNumber']))){
-	$qry .= "AND individual.individual_id = ? ";
+	$qry .= "AND individual.individual_id = :indivNumber ";
 }
 
 
 
-if(!($stmt = $mysqli->prepare($qry))){
-	echo "Prepare failed: "  . $stmt->errno . " " . $stmt->error;
+$stmt = $pdo->prepare($qry);
+
+
+if(!(empty($_POST['BoneNumber']))){
+	$stmt->bindParam(':boneNumber', $_POST['BoneNumber']);
+}
+if(!(empty($_POST['IndividualNumber']))){
+	$stmt->bindParam(':indivNumber', $_POST['IndividualNumber']);
 }
 
 
-//To do: clean up
-//All params
-if(!(empty($_POST['BoneNumber'])) && !(empty($_POST['IndividualNumber'])) 
-	){
-	if(!($stmt->bind_param("ii",$_POST['BoneNumber'],$_POST['IndividualNumber']))){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-//1 param missing
-else if(!(empty($_POST['BoneNumber']))){
-	if(!($stmt->bind_param("i",$_POST['BoneNumber']))
-	){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
-}
-else if(!(empty($_POST['IndividualNumber']))){
-	if(!($stmt->bind_param("i",$_POST['IndividualNumber']))
-	){
-	echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
-	}
+$stmt->execute();
+
+echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
+
+while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+ echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n</tr>";
 }
 
-
-
-
-
-if(!$stmt->execute()){
-	echo "Execute failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-}
-if(!$stmt->bind_result($bone_number, $individual_number)){
-	echo "Bind failed: "  . $mysqli->connect_errno . " " . $mysqli->connect_error;
-}
-
-
-
-while($stmt->fetch()){
- echo "<tr>\n<td>\n" . $bone_number . "\n</td>\n<td>\n" . $individual_number . "\n</td>\n</tr>";
-}
-$stmt->close();
 ?>
 	</table>
 </div>
