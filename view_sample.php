@@ -101,7 +101,7 @@ try {
 					<select name="BoneType">
 						<option value=0>All Types</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_type FROM bone");
+						$stmt = $pdo->prepare("SELECT bone_type FROM type");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
@@ -129,7 +129,7 @@ try {
 			<th>BType</th>
 		</tr>
 <?php
-$qry = "SELECT sample.sample_id, sample.sample_type, bone.bone_number, bone.bone_type FROM sample JOIN bone_sample ON sample.sample_id = bone_sample.sample_id JOIN bone ON bone.bone_id = bone_sample.bone_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT sample.sample_id, sample.sample_type, bone.bone_number, type.bone_type FROM sample JOIN bone_sample ON sample.sample_id = bone_sample.sample_id JOIN bone ON bone.bone_id = bone_sample.bone_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['SampleNumber']))){
@@ -142,7 +142,7 @@ if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
 }
 if(!(empty($_POST['BoneType']))){
-	$qry .= "AND bone.bone_type = :boneType ";
+	$qry .= "AND type.bone_type = :boneType ";
 }
 
 

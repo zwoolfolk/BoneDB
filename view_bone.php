@@ -79,7 +79,7 @@ try {
 					<select name="BoneType">
 						<option value=0>All Types</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_type FROM bone");
+						$stmt = $pdo->prepare("SELECT bone_type FROM type");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
@@ -95,6 +95,7 @@ try {
 					<p>Bone Sex: 
 						<select name="BoneSex">
 							<option value=0>All Sexes</option>
+							<option value='Unknown'>Unknown/Blank</option>
 							<option value='M'>M</option>
 							<option value='F'>F</option>
 						</select></p>
@@ -133,20 +134,24 @@ try {
 			<th>Provenance</th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, bone.bone_type, bone.side, bone.sex, bag.bag_number, box.box_number, bag.bag_provenance FROM bone JOIN bone_bag ON bone.bone_id = bone_bag.bone_id JOIN bag ON bone_bag.bag_id = bag.bag_id JOIN bag_box ON bag_box.bag_id = bag.bag_id JOIN box ON box.box_id = bag_box.box_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, type.bone_type, bone.side, bone.sex, bag.bag_number, box.box_number, bag.bag_provenance FROM bone JOIN bone_bag ON bone.bone_id = bone_bag.bone_id JOIN bag ON bone_bag.bag_id = bag.bag_id JOIN bag_box ON bag_box.bag_id = bag.bag_id JOIN box ON box.box_id = bag_box.box_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
 }
 if(!(empty($_POST['BoneType']))){
-	$qry .= "AND bone.bone_type = :boneType ";
+	$qry .= "AND type.bone_type = :boneType ";
 }
 if(!(empty($_POST['BoneSide']))){
 	$qry .= "AND bone.side = :boneSide ";
 }
 if(!(empty($_POST['BoneSex']))){
-	$qry .= "AND bone.sex = :boneSex ";
+	if($_POST['BoneSex'] == 'Unknown'){
+		$qry .= "AND bone.sex IS NULL ";
+	} else {
+		$qry .= "AND bone.sex = :boneSex ";
+	}
 }
 if(!(empty($_POST['BagProvenance']))){
 	$qry .= "AND bag.bag_provenance = :bagProvenance ";
@@ -183,7 +188,6 @@ echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['sex'] . "\n</td>\n<td>\n" . $row['bag_number'] . "\n</td>\n<td>\n" . $row['box_number'] . "\n</td>\n<td>\n" . $row['bag_provenance'] . "\n</td>\n</tr>";
 }
-
 ?>
 	</table>
 </div>

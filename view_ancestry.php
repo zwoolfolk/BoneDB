@@ -76,7 +76,7 @@ try {
 					<select name="BoneType">
 						<option value=0>All Types</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_type FROM bone");
+						$stmt = $pdo->prepare("SELECT bone_type FROM type");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
@@ -86,11 +86,16 @@ try {
 				<p>Ancestry Type:
 					<select name="AncestryType">
 						<option value=0>All Types</option>
+						<option value='Unknown'>Unknown/Blank</option>
 						<?php
 						$stmt = $pdo->prepare("SELECT ancestry_type FROM ancestry");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							if($row['ancestry_type'] == ' '){
+								echo '<option value="'. $row['ancestry_type'] . '"> ' . 'Unknown/blank' . '</option>\n';
+							} else {
 							echo '<option value="'. $row['ancestry_type'] . '"> ' . $row['ancestry_type'] . '</option>\n';
+							}
 						}
 						?>
 					</select></p>
@@ -115,16 +120,20 @@ try {
 			<th>Anc Type</th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, bone.bone_type, bone.side, ancestry.ancestry_type FROM bone LEFT JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, type.bone_type, bone.side, ancestry.ancestry_type FROM bone LEFT JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
 }
 if(!(empty($_POST['BoneType']))){
-	$qry .= "AND bone.bone_type = :boneType ";
+	$qry .= "AND type.bone_type = :boneType ";
 }
 if(!(empty($_POST['AncestryType']))){
-	$qry .= "AND ancestry.ancestry_type = :ancType ";
+	if($_POST['AncestryType'] == 'Unknown'){
+		$qry .= "AND ancestry.ancestry_type IS NULL ";
+	} else {
+		$qry .= "AND ancestry.ancestry_type = :ancType ";
+	}
 }
 
 

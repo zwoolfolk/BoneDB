@@ -74,6 +74,23 @@ try {
 						}
 						?>
 					</select></p>
+				<p>Bone Type:
+					<select name="BoneType">
+						<option value=0>All Types</option>
+						<?php
+						$stmt = $pdo->prepare("SELECT bone_type FROM type");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
+						}
+						?>
+					</select></p>
+				<p>Bone Side: 
+					<select name="BoneSide">
+						<option value=0>All Sides</option>
+						<option value='Left'>Left</option>
+						<option value='Right'>Right</option>
+					</select></p>
 				<p>Age Type:
 					<select name="AgeType">
 						<option value=0>All Types</option>
@@ -112,15 +129,23 @@ try {
 	<table>
 		<tr>
 			<th>Bone#</th>
-			<th>Age Type</th>
+			<th>BType</th>
+			<th>Side</th>
+			<th>AType</th>
 			<th>Range</th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, age.age_type, age.age_range FROM bone LEFT JOIN bone_age ON bone.bone_id = bone_age.bone_id LEFT JOIN age ON age.age_id = bone_age.age_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, type.bone_type, bone.side, age.age_type, age.age_range FROM bone_age JOIN bone ON bone.bone_id = bone_age.bone_id JOIN age ON age.age_id = bone_age.age_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
+}
+if(!(empty($_POST['BoneType']))){
+	$qry .= "AND type.bone_type = :boneType ";
+}
+if(!(empty($_POST['BoneSide']))){
+	$qry .= "AND bone.side = :boneSide ";
 }
 if(!(empty($_POST['AgeType']))){
 	$qry .= "AND age.age_type = :ageType ";
@@ -134,6 +159,12 @@ $stmt = $pdo->prepare($qry);
 
 if(!(empty($_POST['BoneNumber']))){
 	$stmt->bindParam(':boneNumber', $_POST['BoneNumber']);
+}
+if(!(empty($_POST['BoneType']))){
+	$stmt->bindParam(':boneType', $_POST['BoneType']);
+}
+if(!(empty($_POST['BoneSide']))){
+	$stmt->bindParam(':boneSide', $_POST['BoneSide']);
 }
 if(!(empty($_POST['AgeType']))){
 	$stmt->bindParam(':ageType', $_POST['AgeType']);
@@ -149,7 +180,7 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['age_type'] . "\n</td>\n<td>\n" . $row['age_range'] . "\n</td>\n</tr>";
+echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['age_type'] . "\n</td>\n<td>\n" . $row['age_range'] . "\n</td>\n</tr>";
 }
 
 ?>

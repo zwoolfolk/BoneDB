@@ -1,11 +1,18 @@
 CREATE TABLE `bone` (
 	`bone_id` int(11) AUTO_INCREMENT,
 	`bone_number` int(11),
-	`bone_type` varchar(100) NOT NULL,
 	`side` varchar(10) NOT NULL,
 	`sex` varchar(10),
 	CONSTRAINT `UC_bone` UNIQUE (`bone_number`),
 	PRIMARY KEY(`bone_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+CREATE TABLE `type` (
+	`type_id` int(11) AUTO_INCREMENT,
+	`bone_type` varchar(100) NOT NULL,
+	CONSTRAINT `UC_type` UNIQUE (`bone_type`),
+	PRIMARY KEY(`type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
@@ -79,6 +86,15 @@ CREATE TABLE `bone_bag` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
+CREATE TABLE `bone_type` (
+	`bone_id` int(11) NOT NULL,
+	`type_id` int(11) NOT NULL,
+	CONSTRAINT `bone_type_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
+	CONSTRAINT `bone_type_fk2` FOREIGN KEY (`type_id`) REFERENCES `type` (`type_id`),
+	PRIMARY KEY(`bone_id`, `type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
 CREATE TABLE `bag_box` (
 	`bag_id` int(11) NOT NULL,
 	`box_id` int(11) NOT NULL,
@@ -100,11 +116,13 @@ CREATE TABLE `bone_picture` (
 
 
 CREATE TABLE `bone_ancestry` (
+	`join_id` int(11) AUTO_INCREMENT,
 	`bone_id` int(11) NOT NULL,
 	`ancestry_id` int(11) NOT NULL,
 	CONSTRAINT `bone_ancestry_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_ancestry_fk2` FOREIGN KEY (`ancestry_id`) REFERENCES `ancestry` (`ancestry_id`),
-	PRIMARY KEY(`bone_id`, `ancestry_id`)
+	CONSTRAINT `UC_bone_ancestry` UNIQUE (`bone_id`, `ancestry_id`),
+	PRIMARY KEY(`join_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
@@ -155,10 +173,15 @@ INSERT INTO `bag` (bag_number, bag_provenance) VALUES
 (20193, 'pig'),
 (11111, 'tree');
 
-INSERT INTO `bone` (bone_number, bone_type, side, sex) VALUES 
-(999, 'Femur', 'Left', 'M'),
-(1094, 'ear bone', 'Right', 'F'),
-(1990, 'head bone', 'Left', 'M');
+INSERT INTO `bone` (bone_number, side, sex) VALUES 
+(999, 'Left', 'M'),
+(1094, 'Right', 'F'),
+(1990, 'Left', 'M');
+
+INSERT INTO `type` (bone_type) VALUES 
+('Femur'),
+('ear bone'),
+('head bone');
 
 INSERT INTO `box` (box_number) VALUES
 (4),
@@ -183,6 +206,11 @@ INSERT INTO `sample` (sample_type) VALUES
 
 
 INSERT INTO `bag_box` (bag_id, box_id) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
+INSERT INTO `bone_type` (bone_id, type_id) VALUES
 (1, 1),
 (2, 2),
 (3, 3);
@@ -216,21 +244,3 @@ INSERT INTO `bone_picture` (bone_id, picture_id) VALUES
 INSERT INTO `bone_sample` (bone_id, sample_id) VALUES 
 (1, 1),
 (3, 2);
-
-SET FOREIGN_KEY_CHECKS = 0;
-drop table if exists age;
-drop table if exists ancestry;
-drop table if exists bag;
-drop table if exists bag_box;
-drop table if exists bone;
-drop table if exists bone_age;
-drop table if exists bone_ancestry;
-drop table if exists bone_bag;
-drop table if exists bone_individual;
-drop table if exists bone_picture;
-drop table if exists bone_sample;
-drop table if exists box;
-drop table if exists individual;
-drop table if exists picture;
-drop table if exists sample;
-SET FOREIGN_KEY_CHECKS = 1;
