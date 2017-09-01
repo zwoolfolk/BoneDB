@@ -108,6 +108,17 @@ try {
 						}
 						?>
 					</select></p>
+				<p>Individual Number:
+					<select name="IndividualNumber">
+						<option value=0>All Individuals</option>
+						<?php
+						$stmt = $pdo->prepare("SELECT individual_id FROM individual");
+						$stmt->execute();
+						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+							echo '<option value="'. $row['individual_id'] . '"> ' . $row['individual_id'] . '</option>\n';
+						}
+						?>
+					</select></p>
 		</fieldset>
 		<p><input type="submit" value="Search Samples" /></p>
 	</form>
@@ -127,9 +138,10 @@ try {
 			<th>SType</th>
 			<th>Bone#</th>
 			<th>BType</th>
+			<th>Individual#</th>
 		</tr>
 <?php
-$qry = "SELECT sample.sample_id, sample.sample_type, bone.bone_number, type.bone_type FROM sample JOIN bone_sample ON sample.sample_id = bone_sample.sample_id JOIN bone ON bone.bone_id = bone_sample.bone_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT sample.sample_id, sample.sample_type, bone.bone_number, type.bone_type, individual.individual_id FROM sample JOIN bone_sample ON sample.sample_id = bone_sample.sample_id JOIN bone ON bone.bone_id = bone_sample.bone_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id JOIN bone_individual ON bone.bone_id = bone_individual.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['SampleNumber']))){
@@ -144,7 +156,9 @@ if(!(empty($_POST['BoneNumber']))){
 if(!(empty($_POST['BoneType']))){
 	$qry .= "AND type.bone_type = :boneType ";
 }
-
+if(!(empty($_POST['IndividualNumber']))){
+	$qry .= "AND individual.individual_id = :indivID ";
+}
 
 
 $stmt = $pdo->prepare($qry);
@@ -165,6 +179,9 @@ if(!(empty($_POST['BoneNumber']))){
 if(!(empty($_POST['BoneType']))){
 	$stmt->bindParam(':boneType', $_POST['BoneType']);
 }
+if(!(empty($_POST['IndividualNumber']))){
+	$stmt->bindParam(':indivID', $_POST['IndividualNumber']);
+}
 
 
 
@@ -174,7 +191,7 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-echo "<tr>\n<td>\n" . $row['sample_id'] . "\n</td>\n<td>\n" . $row['sample_type'] . "\n</td>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n</tr>";
+echo "<tr>\n<td>\n" . $row['sample_id'] . "\n</td>\n<td>\n" . $row['sample_type'] . "\n</td>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['individual_id'] .  "\n</td>\n</tr>";
 }
 
 ?>

@@ -65,17 +65,25 @@ try {
 
 
 <?php
-//Update sex
-$qry = "UPDATE bone SET sex = :boneSex WHERE bone_number = :boneNumber";
+//Update sex and side
+$qry = "UPDATE bone SET sex = :boneSex, side = :boneSide WHERE bone_number = :boneNumber";
 
 $stmt = $pdo->prepare($qry);
 
 $stmt->bindParam(':boneNumber', $_POST['BoneNumber']);
+
 if($_POST['BoneSex'] == '0'){
 	$a = NULL;
 	$stmt->bindParam(':boneSex', $a);
 } else { 
 	$stmt->bindParam(':boneSex', $_POST['BoneSex']);
+}
+
+if($_POST['BoneSide'] == '0'){
+	$a = NULL;
+	$stmt->bindParam(':boneSide', $a);
+} else { 
+	$stmt->bindParam(':boneSide', $_POST['BoneSide']);
 }
 
 $stmt->execute();

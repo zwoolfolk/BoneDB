@@ -89,6 +89,7 @@ try {
 					<p>Bone Side: 
 						<select name="BoneSide">
 							<option value=0>All Sides</option>
+							<option value='Unknown'>Unknown/Blank</option>
 							<option value='Left'>Left</option>
 							<option value='Right'>Right</option>
 						</select></p>
@@ -144,7 +145,11 @@ if(!(empty($_POST['BoneType']))){
 	$qry .= "AND type.bone_type = :boneType ";
 }
 if(!(empty($_POST['BoneSide']))){
-	$qry .= "AND bone.side = :boneSide ";
+	if($_POST['BoneSide'] == 'Unknown'){
+		$qry .= "AND bone.side IS NULL ";
+	} else {
+		$qry .= "AND bone.side = :boneSide ";
+	}
 }
 if(!(empty($_POST['BoneSex']))){
 	if($_POST['BoneSex'] == 'Unknown'){

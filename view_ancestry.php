@@ -118,9 +118,10 @@ try {
 			<th>Bone Type</th>
 			<th>Side</th>
 			<th>Anc Type</th>
+			<th>Anc Notes</th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, type.bone_type, bone.side, ancestry.ancestry_type FROM bone LEFT JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, type.bone_type, bone.side, ancestry.ancestry_type, bone_ancestry.ancestry_notes FROM bone LEFT JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
@@ -156,7 +157,7 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
- echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n</tr>";
+ echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $row['ancestry_notes'] . "\n</td>\n</tr>";
 }
 ?>
 	</table>

@@ -1,4 +1,4 @@
-<?php
+<?php 
 ini_set('display_errors', 'On');
 $host 	= 'localhost';
 $db 	= 'bone_db';
@@ -15,7 +15,7 @@ try {
 	$pdo = new PDO($dsn, $user, $pass, $opt);
 } catch (PDOException $e) {
 	echo "Connection error: " . $e->getMessage();
-}
+} 
 ?>
 
 
@@ -68,16 +68,17 @@ try {
 		<legend>Bone Information</legend>
 			<p>Bone Number: 
 				<select name="BoneNumber">
-					<?php
-					$stmt = $pdo->prepare("SELECT bone_number, type.bone_type, sex FROM bone JOIN bone_type ON bone.bone_id = bone_type.bone_id JOIN type ON type.type_id = bone_type.type_id");
+					<?php 
+					$stmt = $pdo->prepare("SELECT bone_number, type.bone_type, sex, side FROM bone JOIN bone_type ON bone.bone_id = bone_type.bone_id JOIN type ON type.type_id = bone_type.type_id");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . ' - ' . $row['bone_type'] . ' - '; 
-							if($row['sex'] == 'NULL'){
-								echo ' ' . '</option>\n';
-							} else {
-								echo $row['sex'] . '</option>\n';
-							}
+						if($row['sex'] == 'NULL'){
+							echo ' ' . '</option>\n';
+						} else {
+							echo $row['sex'];
+						}
+						echo ' - ' . $row['side'] . '</option>\n';
 					}
 					?>
 				</select></p>
@@ -94,8 +95,14 @@ try {
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
-					}
+					} 
 					?>
+				</select></p>
+			<p>Bone Side: 
+				<select name="BoneSide">
+					<option value=0>Unknown/Blank</option>
+					<option value='Left'>Left</option>
+					<option value='Right'>Right</option>
 				</select></p>
 	</fieldset>
 	<p><input type="submit" value="Update Bone" /></p>
@@ -125,12 +132,12 @@ try {
 		<legend>Type Information</legend>
 			<p>Bone Type:
 				<select name="BoneType">
-					<?php
+					<?php 
 					$stmt = $pdo->prepare("SELECT bone_type FROM type");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
-					}
+					} 
 					?>
 				</select></p>
 	</fieldset>
@@ -148,22 +155,22 @@ try {
 		<legend>Bone Information</legend>
 			<p>Bone Number: 
 				<select name="BoneNumber">
-					<?php
+					<?php 
 					$stmt = $pdo->prepare("SELECT bone_number, type.bone_type, ancestry.ancestry_type FROM bone JOIN bone_type ON bone.bone_id = bone_type.bone_id JOIN type ON type.type_id = bone_type.type_id LEFT JOIN bone_ancestry ON bone.bone_id = bone_ancestry.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . ' - ' . $row['bone_type'] . ' - ' . $row['ancestry_type'] . '</option>\n';
-					}
+					} 
 					?>
 				</select></p>
 			<p>Bone Ancestry: 
 				<select name="BoneAncestry">
-					<?php
+					<?php 
 					$stmt = $pdo->prepare("SELECT ancestry_id, ancestry_type FROM ancestry");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){					
 						echo '<option value="'. $row['ancestry_id'] . '"> ' . $row['ancestry_type'] . '</option>\n';
-					}
+					} 
 					?>
 				</select></p>
 	</fieldset>
@@ -182,12 +189,12 @@ try {
 		<legend>Bone Information</legend>
 			<p>Bone Number: 
 				<select name="JoinID">
-					<?php
+					<?php 
 					$stmt = $pdo->prepare("SELECT join_id, bone_number, type.bone_type, ancestry.ancestry_type FROM bone JOIN bone_type ON bone.bone_id = bone_type.bone_id JOIN type ON type.type_id = bone_type.type_id LEFT JOIN bone_ancestry ON bone.bone_id = bone_ancestry.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id WHERE ancestry.ancestry_type IS NOT NULL");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['join_id'] . '"> ' . $row['bone_number'] . ' - ' . $row['bone_type'] . ' - ' . $row['ancestry_type'] . '</option>\n';
-					}
+					} 
 					?>
 				</select></p>
 	</fieldset>
@@ -218,12 +225,12 @@ try {
 		<legend>Type Information</legend>
 			<p>Ancestry Type:
 				<select name="AncestryType">
-					<?php
+					<?php 
 					$stmt = $pdo->prepare("SELECT ancestry_type FROM ancestry");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['ancestry_type'] . '"> ' . $row['ancestry_type'] . '</option>\n';
-					}
+					} 
 					?>
 				</select></p>
 	</fieldset>
@@ -242,17 +249,17 @@ try {
 		<legend>Bone Information</legend>
 			<p>Bone Number: 
 				<select name="BoneNumber"> ****START HERE****
-					<?php
+					<?php 
 					$stmt = $pdo->prepare("SELECT bone_number, type.bone_type, sex FROM bone JOIN bone_type ON bone.bone_id = bone_type.bone_id JOIN type ON type.type_id = bone_type.type_id");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 						echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . ' - ' . $row['bone_type'] . ' - '; 
-							if($row['sex'] == 'NULL'){
-								echo ' ' . '</option>\n';
-							} else {
-								echo $row['sex'] . '</option>\n';
-							}
-					}
+						if($row['sex'] == 'NULL'){
+							echo ' ' . '</option>\n';
+						} else {
+							echo $row['sex'] . '</option>\n';
+						}
+					} 
 					?>
 				</select></p>
 			<p>Bone Sex: 
@@ -279,7 +286,7 @@ try {
 
 
 
-******Add/remove sample (create now row in sample with appropriate type, create new bone_sample assoc)
+******Add/remove sample (create now row in sample with appropriate type, create new bone_sample assoc) 1 sampl 1 bon
 ******Add/remove aging type
 ******Add/remove aging range
 ******Add/remove bone to aging

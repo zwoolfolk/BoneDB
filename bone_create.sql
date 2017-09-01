@@ -1,7 +1,7 @@
 CREATE TABLE `bone` (
 	`bone_id` int(11) AUTO_INCREMENT,
 	`bone_number` int(11),
-	`side` varchar(10) NOT NULL,
+	`side` varchar(10),
 	`sex` varchar(10),
 	CONSTRAINT `UC_bone` UNIQUE (`bone_number`),
 	PRIMARY KEY(`bone_id`)
@@ -119,6 +119,7 @@ CREATE TABLE `bone_ancestry` (
 	`join_id` int(11) AUTO_INCREMENT,
 	`bone_id` int(11) NOT NULL,
 	`ancestry_id` int(11) NOT NULL,
+	`ancestry_notes` text,
 	CONSTRAINT `bone_ancestry_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_ancestry_fk2` FOREIGN KEY (`ancestry_id`) REFERENCES `ancestry` (`ancestry_id`),
 	CONSTRAINT `UC_bone_ancestry` UNIQUE (`bone_id`, `ancestry_id`),
