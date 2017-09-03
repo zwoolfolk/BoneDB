@@ -26,6 +26,7 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 		<h2>Bone Database</h2>
 	<ul>
@@ -57,6 +58,15 @@ try {
 <br />
 
 
+<?php
+	if( (!(empty($_POST['AgeNoteID']))) && (!(empty($_POST['AgeNotes']))) ){
+		$updateNoteQry = "UPDATE bone_age SET age_notes = :ageNotes WHERE join_id = :joinID";
+		$updateNoteStmt = $pdo->prepare($updateNoteQry);
+		$updateNoteStmt->bindParam(':joinID', $_POST['AgeNoteID']);
+		$updateNoteStmt->bindParam(':ageNotes', $_POST['AgeNotes']);
+		$updateNoteStmt->execute();
+	}
+?>
 
 <h3>Search Bones</h3>
 <div>
@@ -133,9 +143,11 @@ try {
 			<th>Side</th>
 			<th>AType</th>
 			<th>Range</th>
+			<th>Age Notes</th>
+			<th></th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, type.bone_type, bone.side, age.age_type, age.age_range FROM bone_age JOIN bone ON bone.bone_id = bone_age.bone_id JOIN age ON age.age_id = bone_age.age_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, type.bone_type, bone.side, age.age_type, age.age_range, bone_age.age_notes, bone_age.join_id FROM bone_age JOIN bone ON bone.bone_id = bone_age.bone_id JOIN age ON age.age_id = bone_age.age_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['BoneNumber']))){
@@ -180,7 +192,21 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['age_type'] . "\n</td>\n<td>\n" . $row['age_range'] . "\n</td>\n</tr>";
+	$notes = nl2br($row['age_notes']);
+
+	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['age_type'] . "\n</td>\n<td>\n" . $row['age_range'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
+		echo "<button class='btn'>Edit Notes</button>
+						<div class='modal'>
+						<form method='post' action='view_age.php'>
+							<div class='modal-content'>
+								<input type='hidden' name='AgeNoteID' value='". $row['join_id'] ."'>" .
+								"<span class='close'>&times;</span>				
+										<textarea name='AgeNotes' class='boxsizingBorder' rows='10'>" . $row['age_notes'] . "</textarea>
+								<p><input type='submit' value='Save' /></p>
+							</div>
+						</form>
+						</div>";
+	echo "\n</td>\n</tr>";
 }
 
 ?>
@@ -188,6 +214,37 @@ echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'
 </div>
 <br />
 
+
+<script>
+// Get the modal
+var modal = document.getElementsByClassName('modal');
+
+// Get the button that opens the modal
+var btn = document.getElementsByClassName('btn');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName('close');
+
+
+
+for(var i = 0; i < modal.length; i++){
+	//add closure
+	(function(_i){
+		//bind button to its div contents
+		var curMod = modal.item(i);
+		var curBut = btn.item(i);
+		var curSpan = span.item(i);
+
+		curBut.addEventListener('click', function(){
+			curMod.style.display = "block";
+		});
+
+		curSpan.addEventListener('click', function(){
+			curMod.style.display = "none";
+		});
+	})(i);
+}
+</script>
 
 
 

@@ -84,7 +84,7 @@ try {
 				</select></p>
 			<p>Bone Sex: 
 				<select name="BoneSex">
-					<option value=0>Unknown/Blank</option>
+					<option value=0>(Blank)</option>
 					<option value='M'>M</option>
 					<option value='F'>F</option>
 				</select></p>
@@ -100,7 +100,7 @@ try {
 				</select></p>
 			<p>Bone Side: 
 				<select name="BoneSide">
-					<option value=0>Unknown/Blank</option>
+					<option value=0>(Blank)</option>
 					<option value='Left'>Left</option>
 					<option value='Right'>Right</option>
 				</select></p>
@@ -264,7 +264,7 @@ try {
 				</select></p>
 			<p>Bone Sex: 
 				<select name="BoneSex">
-					<option value=0>Unknown/Blank</option>
+					<option value=0>(Blank)</option>
 					<option value='M'>M</option>
 					<option value='F'>F</option>
 				</select></p>
@@ -287,16 +287,17 @@ try {
 
 
 ******Add/remove sample (create now row in sample with appropriate type, create new bone_sample assoc) 1 sampl 1 bon
+
 ******Add/remove aging type
 ******Add/remove aging range
 ******Add/remove bone to aging
 
-******Add/edit comments to X
+******Add individual
+******Add bone to individual
 
-******Add individual (?)
-******Add bone to individual (?)
-******Add bone (?)
-******Add picture (?)
+******Add bone
+
+******Add picture
 
 	</body>
 </html>

@@ -98,16 +98,11 @@ try {
 				<p>Ancestry Type:
 					<select name="AncestryType">
 						<option value=0>All Types</option>
-						<option value='Unknown'>Unknown/Blank</option>
 						<?php
 						$stmt = $pdo->prepare("SELECT ancestry_type FROM ancestry");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-							if($row['ancestry_type'] == ' '){
-								echo '<option value="'. $row['ancestry_type'] . '"> ' . 'Unknown/blank' . '</option>\n';
-							} else {
 							echo '<option value="'. $row['ancestry_type'] . '"> ' . $row['ancestry_type'] . '</option>\n';
-							}
 						}
 						?>
 					</select></p>
@@ -134,7 +129,7 @@ try {
 			<th></th>
 		</tr>
 <?php
-$qry = "SELECT bone_ancestry.join_id, bone.bone_number, type.bone_type, bone.side, ancestry.ancestry_type, bone_ancestry.ancestry_notes FROM bone LEFT JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone_ancestry.join_id, bone.bone_number, type.bone_type, bone.side, ancestry.ancestry_type, bone_ancestry.ancestry_notes FROM bone JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
@@ -143,11 +138,7 @@ if(!(empty($_POST['BoneType']))){
 	$qry .= "AND type.bone_type = :boneType ";
 }
 if(!(empty($_POST['AncestryType']))){
-	if($_POST['AncestryType'] == 'Unknown'){
-		$qry .= "AND ancestry.ancestry_type IS NULL ";
-	} else {
-		$qry .= "AND ancestry.ancestry_type = :ancType ";
-	}
+	$qry .= "AND ancestry.ancestry_type = :ancType ";
 }
 
 
@@ -175,18 +166,17 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 $notes = nl2br($row['ancestry_notes']);
 
  echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
- echo "
- <button class='btn'>Edit Notes</button>
-			<div class='modal'>
-			<form method='post' action='view_ancestry.php'>
-				<div class='modal-content'>
-					<input type='hidden' name='JoinID' value='". $row['join_id'] ."'>" .
-					"<span class='close'>&times;</span>				
-							<textarea name='AncNotes' class='boxsizingBorder' rows='10'>" . $row['ancestry_notes'] . "</textarea>
-					<p><input type='submit' value='Save' /></p>
-				</div>
-			</form>
-			</div>";
+	echo "<button class='btn'>Edit Notes</button>
+					<div class='modal'>
+					<form method='post' action='view_ancestry.php'>
+						<div class='modal-content'>
+							<input type='hidden' name='JoinID' value='". $row['join_id'] ."'>" .
+							"<span class='close'>&times;</span>				
+									<textarea name='AncNotes' class='boxsizingBorder' rows='10'>" . $row['ancestry_notes'] . "</textarea>
+							<p><input type='submit' value='Save' /></p>
+						</div>
+					</form>
+					</div>";
  echo "\n</td>\n</tr>";
 }
 ?>

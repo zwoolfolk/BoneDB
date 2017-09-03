@@ -26,6 +26,7 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 	<body>
 		<h2>Bone Database</h2>
@@ -56,6 +57,17 @@ try {
 		</li>
 	</ul>
 <br />
+
+
+<?php
+	if( (!(empty($_POST['JoinID']))) && (!(empty($_POST['IndivNotes']))) ){
+		$updateNoteQry = "UPDATE bone_individual SET individual_notes = :indivNotes WHERE join_id = :joinID";
+		$updateNoteStmt = $pdo->prepare($updateNoteQry);
+		$updateNoteStmt->bindParam(':joinID', $_POST['JoinID']);
+		$updateNoteStmt->bindParam(':indivNotes', $_POST['IndivNotes']);
+		$updateNoteStmt->execute();
+	}
+?>
 
 <h3>Search Individuals</h3>
 <div>
@@ -101,9 +113,11 @@ try {
 		<tr>
 			<th>Bone#</th>
 			<th>Individual#</th>
+			<th>Individual Notes</th>
+			<th></th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, individual.individual_id FROM bone JOIN bone_individual ON bone_individual.bone_id = bone.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, individual.individual_id, bone_individual.individual_notes, bone_individual.join_id FROM bone JOIN bone_individual ON bone_individual.bone_id = bone.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
@@ -130,10 +144,58 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
- echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n</tr>";
-}
+	$notes = nl2br($row['individual_notes']);
 
+
+	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
+		echo "<button class='btn'>Edit Notes</button>
+								<div class='modal'>
+								<form method='post' action='view_individual.php'>
+									<div class='modal-content'>
+										<input type='hidden' name='JoinID' value='". $row['join_id'] ."'>" .
+										"<span class='close'>&times;</span>				
+												<textarea name='IndivNotes' class='boxsizingBorder' rows='10'>" . $row['individual_notes'] . "</textarea>
+										<p><input type='submit' value='Save' /></p>
+									</div>
+								</form>
+								</div>";
+	echo "\n</td>\n</tr>";
+}
 ?>
+
+
+<script>
+// Get the modal
+var modal = document.getElementsByClassName('modal');
+
+// Get the button that opens the modal
+var btn = document.getElementsByClassName('btn');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName('close');
+
+
+
+for(var i = 0; i < modal.length; i++){
+	//add closure
+	(function(_i){
+		//bind button to its div contents
+		var curMod = modal.item(i);
+		var curBut = btn.item(i);
+		var curSpan = span.item(i);
+
+		curBut.addEventListener('click', function(){
+			curMod.style.display = "block";
+		});
+
+		curSpan.addEventListener('click', function(){
+			curMod.style.display = "none";
+		});
+	})(i);
+}
+</script>
+
+
 	</table>
 </div>
 <br />

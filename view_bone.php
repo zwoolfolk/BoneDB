@@ -26,6 +26,7 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 	<body>
 		<h2>Bone Database</h2>
@@ -58,6 +59,15 @@ try {
 <br />
 
 
+<?php
+	if( (!(empty($_POST['BoneNoteID']))) && (!(empty($_POST['BoneNotes']))) ){
+		$updateNoteQry = "UPDATE bone SET bone_notes = :boneNotes WHERE bone_id = :boneID";
+		$updateNoteStmt = $pdo->prepare($updateNoteQry);
+		$updateNoteStmt->bindParam(':boneID', $_POST['BoneNoteID']);
+		$updateNoteStmt->bindParam(':boneNotes', $_POST['BoneNotes']);
+		$updateNoteStmt->execute();
+	}
+?>
 
 <h3>Search Bones</h3>
 <div>
@@ -89,14 +99,14 @@ try {
 					<p>Bone Side: 
 						<select name="BoneSide">
 							<option value=0>All Sides</option>
-							<option value='Unknown'>Unknown/Blank</option>
+							<option value='Unknown'>(Blank)</option>
 							<option value='Left'>Left</option>
 							<option value='Right'>Right</option>
 						</select></p>
 					<p>Bone Sex: 
 						<select name="BoneSex">
 							<option value=0>All Sexes</option>
-							<option value='Unknown'>Unknown/Blank</option>
+							<option value='Unknown'>(Blank)</option>
 							<option value='M'>M</option>
 							<option value='F'>F</option>
 						</select></p>
@@ -133,9 +143,14 @@ try {
 			<th>Bag</th>
 			<th>Box</th>
 			<th>Provenance</th>
+			<th>Ancestry</th>
+			<th>Age Range</th>
+			<th>Individual#</th>
+			<th>Bone Notes</th>
+			<th></th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, type.bone_type, bone.side, bone.sex, bag.bag_number, box.box_number, bag.bag_provenance FROM bone JOIN bone_bag ON bone.bone_id = bone_bag.bone_id JOIN bag ON bone_bag.bag_id = bag.bag_id JOIN bag_box ON bag_box.bag_id = bag.bag_id JOIN box ON box.box_id = bag_box.box_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_id, bone.bone_number, type.bone_type, bone.side, bone.sex, bag.bag_number, box.box_number, bag.bag_provenance, ancestry.ancestry_type, age.age_range, individual.individual_id, bone.bone_notes FROM bone JOIN bone_bag ON bone.bone_id = bone_bag.bone_id JOIN bag ON bone_bag.bag_id = bag.bag_id JOIN bag_box ON bag_box.bag_id = bag.bag_id JOIN box ON box.box_id = bag_box.box_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id LEFT JOIN bone_ancestry ON bone.bone_id = bone_ancestry.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id LEFT JOIN bone_age ON bone_age.bone_id = bone.bone_id LEFT JOIN age ON age.age_id = bone_age.age_id LEFT JOIN bone_individual ON bone_individual.bone_id = bone.bone_id LEFT JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['BoneNumber']))){
@@ -161,6 +176,8 @@ if(!(empty($_POST['BoneSex']))){
 if(!(empty($_POST['BagProvenance']))){
 	$qry .= "AND bag.bag_provenance = :bagProvenance ";
 }
+
+$qry .= " GROUP BY bone.bone_number "; 
 
 $stmt = $pdo->prepare($qry);
 
@@ -191,9 +208,56 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['sex'] . "\n</td>\n<td>\n" . $row['bag_number'] . "\n</td>\n<td>\n" . $row['box_number'] . "\n</td>\n<td>\n" . $row['bag_provenance'] . "\n</td>\n</tr>";
+	$notes = nl2br($row['bone_notes']);
+
+	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['sex'] . "\n</td>\n<td>\n" . $row['bag_number'] . "\n</td>\n<td>\n" . $row['box_number'] . "\n</td>\n<td>\n" . $row['bag_provenance'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $row['age_range'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
+		echo "<button class='btn'>Edit Notes</button>
+						<div class='modal'>
+						<form method='post' action='view_bone.php'>
+							<div class='modal-content'>
+								<input type='hidden' name='BoneNoteID' value='". $row['bone_id'] ."'>" .
+								"<span class='close'>&times;</span>				
+										<textarea name='BoneNotes' class='boxsizingBorder' rows='10'>" . $row['bone_notes'] . "</textarea>
+								<p><input type='submit' value='Save' /></p>
+							</div>
+						</form>
+						</div>";
+	echo "\n</td>\n</tr>";
 }
 ?>
+
+
+<script>
+// Get the modal
+var modal = document.getElementsByClassName('modal');
+
+// Get the button that opens the modal
+var btn = document.getElementsByClassName('btn');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName('close');
+
+
+
+for(var i = 0; i < modal.length; i++){
+	//add closure
+	(function(_i){
+		//bind button to its div contents
+		var curMod = modal.item(i);
+		var curBut = btn.item(i);
+		var curSpan = span.item(i);
+
+		curBut.addEventListener('click', function(){
+			curMod.style.display = "block";
+		});
+
+		curSpan.addEventListener('click', function(){
+			curMod.style.display = "none";
+		});
+	})(i);
+}
+</script>
+
 	</table>
 </div>
 <br />

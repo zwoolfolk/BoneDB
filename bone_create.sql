@@ -3,6 +3,7 @@ CREATE TABLE `bone` (
 	`bone_number` int(11),
 	`side` varchar(10),
 	`sex` varchar(10),
+	`bone_notes` text,
 	CONSTRAINT `UC_bone` UNIQUE (`bone_number`),
 	PRIMARY KEY(`bone_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -36,6 +37,7 @@ CREATE TABLE `box` (
 CREATE TABLE `picture` (
 	`picture_id` int(11) AUTO_INCREMENT,
 	`picture_number` int(11) NOT NULL,
+	`picture_tags` text,
 	CONSTRAINT `UC_picture` UNIQUE (`picture_number`),
 	PRIMARY KEY(`picture_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -115,6 +117,7 @@ CREATE TABLE `bone_picture` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
+
 CREATE TABLE `bone_ancestry` (
 	`join_id` int(11) AUTO_INCREMENT,
 	`bone_id` int(11) NOT NULL,
@@ -128,34 +131,42 @@ CREATE TABLE `bone_ancestry` (
 
 
 CREATE TABLE `bone_sample` (
+	`join_id` int(11) AUTO_INCREMENT,
 	`bone_id` int(11) NOT NULL,
 	`sample_id` int(11) NOT NULL,
+	`sample_notes` text,
 	CONSTRAINT `bone_sample_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_sample_fk2` FOREIGN KEY (`sample_id`) REFERENCES `sample` (`sample_id`),
 	CONSTRAINT `UC_bone_sample` UNIQUE (`sample_id`),
-	PRIMARY KEY(`bone_id`, `sample_id`)
+	PRIMARY KEY(`join_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 CREATE TABLE `bone_individual` (
+	`join_id` int(11) AUTO_INCREMENT,
 	`bone_id` int(11) NOT NULL,
 	`individual_id` int(11) NOT NULL,
+	`individual_notes` text,
 	CONSTRAINT `bone_individual_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_individual_fk2` FOREIGN KEY (`individual_id`) REFERENCES `individual` (`individual_id`),
-	CONSTRAINT `UC_bone_individual` UNIQUE (`bone_id`),
-	PRIMARY KEY(`bone_id`, `individual_id`)
+	CONSTRAINT `UC_bone_individual` UNIQUE (`bone_id`, `individual_id`),
+	PRIMARY KEY(`join_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 CREATE TABLE `bone_age` (
+	`join_id` int(11) AUTO_INCREMENT,
 	`bone_id` int(11) NOT NULL,
 	`age_id` int(11) NOT NULL,
+	`age_notes` text,
 	CONSTRAINT `bone_age_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_age_fk2` FOREIGN KEY (`age_id`) REFERENCES `age` (`age_id`),
-	PRIMARY KEY(`bone_id`, `age_id`)
+	CONSTRAINT `UC_bone_age` UNIQUE (`bone_id`, `age_id`),
+	PRIMARY KEY(`join_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
+ALTER TABLE `picture` ADD FULLTEXT(`picture_tags`);
 
 
 
