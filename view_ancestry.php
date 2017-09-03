@@ -25,9 +25,11 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 	<body>
 		<h2>Bone Database</h2>
+
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
@@ -117,8 +119,9 @@ try {
 			<th>Bone#</th>
 			<th>Bone Type</th>
 			<th>Side</th>
-			<th>Anc Type</th>
-			<th>Anc Notes</th>
+			<th>Ancestry Type</th>
+			<th>Ancestry Notes</th>
+			<th></th>
 		</tr>
 <?php
 $qry = "SELECT bone.bone_number, type.bone_type, bone.side, ancestry.ancestry_type, bone_ancestry.ancestry_notes FROM bone LEFT JOIN bone_ancestry ON bone_ancestry.bone_id = bone.bone_id LEFT JOIN ancestry ON ancestry.ancestry_id = bone_ancestry.ancestry_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id WHERE bone.bone_id IS NOT NULL ";
@@ -157,15 +160,56 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
- echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $row['ancestry_notes'] . "\n</td>\n</tr>";
+ echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $row['ancestry_notes'] . "\n</td>\n<td>\n";
+ echo "
+ <button class='btn'>Edit Notes</button>
+			<div class='modal'>
+				<div class='modal-content'>
+					<span class='close'>&times;</span>				
+							<textarea class='boxsizingBorder' rows='10'>" . $row['ancestry_notes'] . "</textarea>
+				</div>
+			</div>";
+ echo "\n</td>\n</tr>";
 }
 ?>
+
+<script>
+// Get the modal
+var modal = document.getElementsByClassName('modal');
+
+// Get the button that opens the modal
+var btn = document.getElementsByClassName('btn');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName('close');
+
+
+
+for(var i = 0; i < modal.length; i++){
+	//add closure
+	(function(_i){
+		//bind button to its div contents
+		var curMod = modal.item(i);
+		var curBut = btn.item(i);
+		var curSpan = span.item(i);
+
+		curBut.addEventListener('click', function(){
+			curMod.style.display = "block";
+		});
+
+		curSpan.addEventListener('click', function(){
+			curMod.style.display = "none";
+		});
+	})(i);
+}
+</script>
+
+	
+
+
 	</table>
 </div>
 <br />
-
-
-
 
 
 
