@@ -68,7 +68,7 @@ try {
 	}
 ?>
 
-<h3>Search Bones</h3>
+<h3>Search Age</h3>
 <div>
 	<form method="post" action="view_age.php">
 		<fieldset>
@@ -105,7 +105,7 @@ try {
 					<select name="AgeType">
 						<option value=0>All Types</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT age_type FROM age");
+						$stmt = $pdo->prepare("SELECT age_type FROM age GROUP BY age_type");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['age_type'] . '"> ' . $row['age_type'] . '</option>\n';
@@ -116,7 +116,7 @@ try {
 					<select name="AgeRange">
 						<option value=0>All Ranges</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT age_range FROM age");
+						$stmt = $pdo->prepare("SELECT age_range FROM age GROUP BY age_range");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['age_range'] . '"> ' . $row['age_range'] . '</option>\n';

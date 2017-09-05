@@ -65,16 +65,14 @@ try {
 
 
 <?php
-//Delete ancestry type
-$qry = "DELETE FROM ancestry WHERE ancestry_type = :ancType";
+//Add new individual
+$qry = "INSERT INTO `individual` (individual_id) VALUES (null)";
 
 $stmt = $pdo->prepare($qry);
 
-$stmt->bindParam(':ancType', $_POST['AncestryType']);
-
 $stmt->execute();
 
-echo "<div>Removed " . $stmt->rowCount() . " records.</div><br />";
+echo "<div>Added " . $stmt->rowCount() . " records.</div><br />";
 ?>
 
 

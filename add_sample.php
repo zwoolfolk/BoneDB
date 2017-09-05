@@ -65,16 +65,17 @@ try {
 
 
 <?php
-//Delete ancestry type
-$qry = "DELETE FROM ancestry WHERE ancestry_type = :ancType";
+//Add new sample
+$qry = "INSERT INTO bone_sample (bone_id, sample_id) VALUES ((SELECT bone_id FROM bone WHERE bone_number = :boneNumber), :sampleType)";
 
 $stmt = $pdo->prepare($qry);
 
-$stmt->bindParam(':ancType', $_POST['AncestryType']);
+$stmt->bindParam(':boneNumber', $_POST['BoneNumber']);
+$stmt->bindParam(':sampleType', $_POST['SampleType']);
 
 $stmt->execute();
 
-echo "<div>Removed " . $stmt->rowCount() . " records.</div><br />";
+echo "<div>Added " . $stmt->rowCount() . " records.</div><br />";
 ?>
 
 

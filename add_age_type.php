@@ -65,16 +65,17 @@ try {
 
 
 <?php
-//Delete ancestry type
-$qry = "DELETE FROM ancestry WHERE ancestry_type = :ancType";
+//Add new age type
+$qry = "INSERT INTO age (age_type, age_range) VALUES (:ageType, :ageRange)";
 
 $stmt = $pdo->prepare($qry);
 
-$stmt->bindParam(':ancType', $_POST['AncestryType']);
+$stmt->bindParam(':ageType', $_POST['AgeType']);
+$stmt->bindParam(':ageRange', $_POST['AgeRange']);
 
 $stmt->execute();
 
-echo "<div>Removed " . $stmt->rowCount() . " records.</div><br />";
+echo "<div>Added " . $stmt->rowCount() . " records.</div><br />";
 ?>
 
 

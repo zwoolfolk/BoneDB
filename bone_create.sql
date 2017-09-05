@@ -1,6 +1,6 @@
 CREATE TABLE `bone` (
 	`bone_id` int(11) AUTO_INCREMENT,
-	`bone_number` int(11),
+	`bone_number` int(11) NOT NULL,
 	`side` varchar(10),
 	`sex` varchar(10),
 	`bone_notes` text,
@@ -137,7 +137,7 @@ CREATE TABLE `bone_sample` (
 	`sample_notes` text,
 	CONSTRAINT `bone_sample_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_sample_fk2` FOREIGN KEY (`sample_id`) REFERENCES `sample` (`sample_id`),
-	CONSTRAINT `UC_bone_sample` UNIQUE (`sample_id`),
+	CONSTRAINT `UC_bone_sample` UNIQUE (`bone_id`, `sample_id`),
 	PRIMARY KEY(`join_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -149,7 +149,7 @@ CREATE TABLE `bone_individual` (
 	`individual_notes` text,
 	CONSTRAINT `bone_individual_fk1` FOREIGN KEY (`bone_id`) REFERENCES `bone` (`bone_id`),
 	CONSTRAINT `bone_individual_fk2` FOREIGN KEY (`individual_id`) REFERENCES `individual` (`individual_id`),
-	CONSTRAINT `UC_bone_individual` UNIQUE (`bone_id`, `individual_id`),
+	CONSTRAINT `UC_bone_individual` UNIQUE (`bone_id`),
 	PRIMARY KEY(`join_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 

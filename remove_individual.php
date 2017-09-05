@@ -65,12 +65,12 @@ try {
 
 
 <?php
-//Delete ancestry type
-$qry = "DELETE FROM ancestry WHERE ancestry_type = :ancType";
+//Delete individual
+$qry = "DELETE FROM individual WHERE individual_id = :individualID";
 
 $stmt = $pdo->prepare($qry);
 
-$stmt->bindParam(':ancType', $_POST['AncestryType']);
+$stmt->bindParam(':individualID', $_POST['IndividualID']);
 
 $stmt->execute();
 

@@ -65,12 +65,12 @@ try {
 
 
 <?php
-//Delete ancestry type
-$qry = "DELETE FROM ancestry WHERE ancestry_type = :ancType";
+//Add new sample
+$qry = "DELETE FROM bone_sample WHERE join_id = :joinID";
 
 $stmt = $pdo->prepare($qry);
 
-$stmt->bindParam(':ancType', $_POST['AncestryType']);
+$stmt->bindParam(':joinID', $_POST['SampleNumber']);
 
 $stmt->execute();
 

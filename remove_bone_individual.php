@@ -65,12 +65,12 @@ try {
 
 
 <?php
-//Delete ancestry type
-$qry = "DELETE FROM ancestry WHERE ancestry_type = :ancType";
+//Delete bone-individual association
+$qry = "DELETE FROM bone_individual WHERE join_id = :joinID";
 
 $stmt = $pdo->prepare($qry);
 
-$stmt->bindParam(':ancType', $_POST['AncestryType']);
+$stmt->bindParam(':joinID', $_POST['JoinID']);
 
 $stmt->execute();
 

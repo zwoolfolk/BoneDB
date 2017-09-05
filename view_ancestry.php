@@ -163,21 +163,21 @@ echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-$notes = nl2br($row['ancestry_notes']);
+	$notes = nl2br($row['ancestry_notes']);
 
- echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
-	echo "<button class='btn'>Edit Notes</button>
-					<div class='modal'>
-					<form method='post' action='view_ancestry.php'>
-						<div class='modal-content'>
-							<input type='hidden' name='JoinID' value='". $row['join_id'] ."'>" .
-							"<span class='close'>&times;</span>				
-									<textarea name='AncNotes' class='boxsizingBorder' rows='10'>" . $row['ancestry_notes'] . "</textarea>
-							<p><input type='submit' value='Save' /></p>
-						</div>
-					</form>
-					</div>";
- echo "\n</td>\n</tr>";
+	 echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['side'] . "\n</td>\n<td>\n" . $row['ancestry_type'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
+		echo "<button class='btn'>Edit Notes</button>
+						<div class='modal'>
+						<form method='post' action='view_ancestry.php'>
+							<div class='modal-content'>
+								<input type='hidden' name='JoinID' value='". $row['join_id'] ."'>" .
+								"<span class='close'>&times;</span>				
+										<textarea name='AncNotes' class='boxsizingBorder' rows='10'>" . $row['ancestry_notes'] . "</textarea>
+								<p><input type='submit' value='Save' /></p>
+							</div>
+						</form>
+						</div>";
+	 echo "\n</td>\n</tr>";
 }
 ?>
 
