@@ -35,6 +35,9 @@ try {
 			<a href="index.php">Home</a>
 		</li>
 		<li>
+			<a href="analyses.php">Analyses</a>
+		</li>
+		<li>
 			<a href="manage.php">Manage</a>
 		</li>
 		<li>
@@ -78,7 +81,7 @@ try {
 					<select name="BoneNumber">
 						<option value=0>All Bones</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_number FROM bone");
+						$stmt = $pdo->prepare("SELECT bone_number FROM bone JOIN bone_individual ON bone.bone_id = bone_individual.bone_id WHERE bone.bone_id IN (SELECT bone_id FROM bone_individual) GROUP BY bone.bone_id ORDER BY bone_number");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . '</option>\n';
@@ -112,12 +115,13 @@ try {
 	<table>
 		<tr>
 			<th>Bone#</th>
+			<th>BType</th>
 			<th>Individual#</th>
 			<th>Individual Notes</th>
 			<th></th>
 		</tr>
 <?php
-$qry = "SELECT bone.bone_number, individual.individual_id, bone_individual.individual_notes, bone_individual.join_id FROM bone JOIN bone_individual ON bone_individual.bone_id = bone.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone.bone_number, individual.individual_id, type.bone_type, bone_individual.individual_notes, bone_individual.join_id FROM bone JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON bone_type.type_id = type.type_id JOIN bone_individual ON bone_individual.bone_id = bone.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
 
 if(!(empty($_POST['BoneNumber']))){
 	$qry .= "AND bone.bone_number = :boneNumber ";
@@ -147,7 +151,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 	$notes = nl2br($row['individual_notes']);
 
 
-	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
+	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
 		echo "<button class='btn'>Edit Notes</button>
 								<div class='modal'>
 								<form method='post' action='view_individual.php'>

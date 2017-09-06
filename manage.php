@@ -26,12 +26,16 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 	<body>
 		<h2>Bone Database</h2>
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
+		</li>
+		<li>
+			<a href="analyses.php">Analyses</a>
 		</li>
 		<li>
 			<a href="manage.php">Manage</a>
@@ -549,25 +553,33 @@ try {
 
 <h3>Add Picture</h3>
 <div>
-<form method="post" action="add_picture.php">
+<form method="post" action="add_picture.php" enctype="multipart/form-data">
 	<fieldset>
-		<legend>Individual Information</legend>
-			<p>Individual Number:
-				<select name="">
+		<legend>Picture Information</legend>
+			<p>Bone Number:
+				<select name="BoneID">
 					<?php 
-					$stmt = $pdo->prepare("SELECT individual_id FROM individual");
+					$stmt = $pdo->prepare("SELECT bone.bone_id, bone_number, type.bone_type, sex FROM bone JOIN bone_type ON bone.bone_id = bone_type.bone_id JOIN type ON type.type_id = bone_type.type_id ORDER BY bone_number");
 					$stmt->execute();
 					while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-						echo '<option value="'. $row['individual_id'] . '"> ' . $row['individual_id'] . '</option>\n';
+						echo '<option value="'. $row['bone_id'] . '"> ' . $row['bone_number'] . ' - ' . $row['bone_type'] . ' - '; 
+						if($row['sex'] == 'NULL'){
+							echo ' ' . '</option>\n';
+						} else {
+							echo $row['sex'] . '</option>\n';
+						}
 					} 
 					?>
 				</select></p>
-			<p><input type="file" name="pictureFile" /></p>
+			<p>Picture Number: <input type="number" name="PictureNumber" min="1" /></p>
+			<p>Picture Tags: <input type="text" name="PictureTags" /></p>
+			<p><input type="file" name="PictureFile" /></p>
 	</fieldset>
-	<p><input type="submit" value="Remove Individual" /></p>
+	<p><input type="submit" value="Add Picture" /></p>
 </form>
 </div>
 <br />
+
 
 
 

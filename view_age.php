@@ -28,10 +28,14 @@ try {
 	<title>Bones</title>
 	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
+	<body>
 		<h2>Bone Database</h2>
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
+		</li>
+		<li>
+			<a href="analyses.php">Analyses</a>
 		</li>
 		<li>
 			<a href="manage.php">Manage</a>
@@ -77,7 +81,7 @@ try {
 					<select name="BoneNumber">
 						<option value=0>All Bones</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_number FROM bone");
+						$stmt = $pdo->prepare("SELECT bone_number FROM bone JOIN bone_age ON bone.bone_id = bone_age.bone_id WHERE bone.bone_id IN (SELECT bone_id FROM bone_age) GROUP BY bone.bone_id ORDER BY bone_number");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . '</option>\n';
@@ -88,7 +92,7 @@ try {
 					<select name="BoneType">
 						<option value=0>All Types</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_type FROM type");
+						$stmt = $pdo->prepare("SELECT bone_type FROM type JOIN bone_type ON type.type_id = bone_type.type_id JOIN bone_age ON bone_age.bone_id = bone_type.bone_id WHERE bone_type.bone_id IN (SELECT bone_id FROM bone_age) GROUP BY bone_type");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
@@ -165,7 +169,7 @@ if(!(empty($_POST['AgeType']))){
 if(!(empty($_POST['AgeRange']))){
 	$qry .= "AND age.age_range = :ageRange ";
 }
-
+$qry .= "ORDER BY bone_number ";
 $stmt = $pdo->prepare($qry);
 
 

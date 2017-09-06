@@ -20,9 +20,6 @@ try {
 
 
 
-
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
@@ -61,26 +58,8 @@ try {
 			<a href="view_sample.php">View Samples</a>
 		</li>
 	</ul>
-
-
 <br />
 
-
-
-
-<?php
-//Add new age type
-$qry = "INSERT INTO age (age_type, age_range) VALUES (:ageType, :ageRange)";
-
-$stmt = $pdo->prepare($qry);
-
-$stmt->bindParam(':ageType', $_POST['AgeType']);
-$stmt->bindParam(':ageRange', $_POST['AgeRange']);
-
-$stmt->execute();
-
-echo "<div>Added " . $stmt->rowCount() . " records.</div><br />";
-?>
 
 
 

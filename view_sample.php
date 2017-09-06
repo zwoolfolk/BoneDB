@@ -26,12 +26,16 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 	<body>
 		<h2>Bone Database</h2>
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
+		</li>
+		<li>
+			<a href="analyses.php">Analyses</a>
 		</li>
 		<li>
 			<a href="manage.php">Manage</a>
@@ -57,7 +61,15 @@ try {
 	</ul>
 <br />
 
-
+<?php
+	if( (!(empty($_POST['JoinID']))) && (!(empty($_POST['SampleNotes']))) ){
+		$updateNoteQry = "UPDATE bone_sample SET sample_notes = :sampleNotes WHERE join_id = :joinID";
+		$updateNoteStmt = $pdo->prepare($updateNoteQry);
+		$updateNoteStmt->bindParam(':joinID', $_POST['JoinID']);
+		$updateNoteStmt->bindParam(':sampleNotes', $_POST['SampleNotes']);
+		$updateNoteStmt->execute();
+	}
+?>
 
 <h3>Search Samples</h3>
 <div>
@@ -90,7 +102,7 @@ try {
 					<select name="BoneNumber">
 						<option value=0>All Bones</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_number FROM bone");
+						$stmt = $pdo->prepare("SELECT bone_number FROM bone JOIN bone_sample ON bone.bone_id = bone_sample.bone_id WHERE bone.bone_id IN (SELECT bone_id FROM bone_sample) GROUP BY bone.bone_id ORDER BY bone_number");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_number'] . '"> ' . $row['bone_number'] . '</option>\n';
@@ -101,7 +113,7 @@ try {
 					<select name="BoneType">
 						<option value=0>All Types</option>
 						<?php
-						$stmt = $pdo->prepare("SELECT bone_type FROM type");
+						$stmt = $pdo->prepare("SELECT bone_type FROM type JOIN bone_type ON type.type_id = bone_type.type_id JOIN bone ON bone_type.bone_id = bone.bone_id JOIN bone_sample ON bone.bone_id = bone_sample.bone_id WHERE bone_type.bone_id IN (SELECT bone_id FROM bone_sample) GROUP BY bone_type");
 						$stmt->execute();
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 							echo '<option value="'. $row['bone_type'] . '"> ' . $row['bone_type'] . '</option>\n';
@@ -139,9 +151,11 @@ try {
 			<th>Bone#</th>
 			<th>BType</th>
 			<th>Individual#</th>
+			<th>Sample Notes</th>
+			<th></th>
 		</tr>
 <?php
-$qry = "SELECT bone_sample.join_id, sample.sample_type, bone.bone_number, type.bone_type, individual.individual_id FROM sample JOIN bone_sample ON sample.sample_id = bone_sample.sample_id JOIN bone ON bone.bone_id = bone_sample.bone_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id JOIN bone_individual ON bone.bone_id = bone_individual.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
+$qry = "SELECT bone_sample.join_id, sample.sample_type, bone.bone_number, type.bone_type, individual.individual_id, bone_sample.sample_notes FROM sample JOIN bone_sample ON sample.sample_id = bone_sample.sample_id JOIN bone ON bone.bone_id = bone_sample.bone_id JOIN bone_type ON bone_type.bone_id = bone.bone_id JOIN type ON type.type_id = bone_type.type_id JOIN bone_individual ON bone.bone_id = bone_individual.bone_id JOIN individual ON individual.individual_id = bone_individual.individual_id WHERE bone.bone_id IS NOT NULL ";
 
 
 if(!(empty($_POST['SampleNumber']))){
@@ -160,7 +174,7 @@ if(!(empty($_POST['IndividualNumber']))){
 	$qry .= "AND individual.individual_id = :indivID ";
 }
 
-
+$qry .= "ORDER BY bone_sample.join_id ";
 $stmt = $pdo->prepare($qry);
 
 
@@ -191,10 +205,59 @@ $stmt->execute();
 echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-echo "<tr>\n<td>\n" . $row['join_id'] . "\n</td>\n<td>\n" . $row['sample_type'] . "\n</td>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['individual_id'] .  "\n</td>\n</tr>";
+	$notes = nl2br($row['sample_notes']);
+
+	echo "<tr>\n<td>\n" . $row['join_id'] . "\n</td>\n<td>\n" . $row['sample_type'] . "\n</td>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['bone_type'] . "\n</td>\n<td>\n" . $row['individual_id'] . "\n</td>\n<td>\n" . $notes . "\n</td>\n<td>\n";
+	echo "<button class='btn'>Edit Notes</button>
+							<div class='modal'>
+							<form method='post' action='view_sample.php'>
+								<div class='modal-content'>
+									<input type='hidden' name='JoinID' value='". $row['join_id'] ."'>" .
+									"<span class='close'>&times;</span>				
+											<textarea name='SampleNotes' class='boxsizingBorder' rows='10'>" . $row['sample_notes'] . "</textarea>
+									<p><input type='submit' value='Save' /></p>
+								</div>
+							</form>
+							</div>";
+	echo "\n</td>\n</tr>";
 }
 
 ?>
+
+
+<script>
+// Get the modal
+var modal = document.getElementsByClassName('modal');
+
+// Get the button that opens the modal
+var btn = document.getElementsByClassName('btn');
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName('close');
+
+
+
+for(var i = 0; i < modal.length; i++){
+	//add closure
+	(function(_i){
+		//bind button to its div contents
+		var curMod = modal.item(i);
+		var curBut = btn.item(i);
+		var curSpan = span.item(i);
+
+		curBut.addEventListener('click', function(){
+			curMod.style.display = "block";
+		});
+
+		curSpan.addEventListener('click', function(){
+			curMod.style.display = "none";
+		});
+	})(i);
+}
+</script>
+
+
+
 	</table>
 </div>
 <br />

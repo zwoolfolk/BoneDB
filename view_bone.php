@@ -35,6 +35,9 @@ try {
 			<a href="index.php">Home</a>
 		</li>
 		<li>
+			<a href="analyses.php">Analyses</a>
+		</li>
+		<li>
 			<a href="manage.php">Manage</a>
 		</li>
 		<li>

@@ -28,12 +28,16 @@ try {
 <html>
 	<head>
 	<title>Bones</title>
+	<link rel="stylesheet" type="text/css" href="./css/style.css">
 	</head>
 	<body>
 		<h2>Bone Database</h2>
 	<ul>
 		<li>
 			<a href="index.php">Home</a>
+		</li>
+		<li>
+			<a href="analyses.php">Analyses</a>
 		</li>
 		<li>
 			<a href="manage.php">Manage</a>
@@ -57,7 +61,6 @@ try {
 			<a href="view_sample.php">View Samples</a>
 		</li>
 	</ul>
-
 
 <br />
 

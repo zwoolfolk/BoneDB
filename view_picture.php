@@ -35,6 +35,9 @@ try {
 			<a href="index.php">Home</a>
 		</li>
 		<li>
+			<a href="analyses.php">Analyses</a>
+		</li>
+		<li>
 			<a href="manage.php">Manage</a>
 		</li>
 		<li>
@@ -131,10 +134,10 @@ if(!(empty($_POST['PictureNumber']))){
 	$qry .= "AND picture.picture_number = :pictureNumber ";
 }
 if(!(empty($_POST['SearchTags']))){
-	$qry .= "AND MATCH picture.picture_tags AGAINST (:searchTags) ";
+	$qry .= "AND MATCH picture.picture_tags AGAINST (:searchTags IN BOOLEAN MODE) ";
 }
 
-
+$qry .= "ORDER BY picture_number ";
 $stmt = $pdo->prepare($qry);
 
 
@@ -145,7 +148,15 @@ if(!(empty($_POST['PictureNumber']))){
 	$stmt->bindParam(':pictureNumber', $_POST['PictureNumber']);
 }
 if(!(empty($_POST['SearchTags']))){
-	$stmt->bindParam(':searchTags', $_POST['SearchTags']);
+	//adjust search tags as boolean 'and' rather than default 'or'
+	$adjust = explode(" ", $_POST['SearchTags']);
+	
+	$searchStr = "";
+	foreach($adjust as $a){
+		$searchStr .= '+' . $a . ' ';
+	}
+
+	$stmt->bindParam(':searchTags', $searchStr);
 }
 
 $stmt->execute();
@@ -154,7 +165,7 @@ echo "<div>" . $stmt->rowCount() . " records found.</div><br />";
 
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 	$tags = nl2br($row['picture_tags']);
-	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['picture_number'] . "\n</td>\n<td>\n" . "<img id='" . $row['picture_number'] . "' src='test/" . $row['picture_number'] . ".JPG' height='346px' width='461px'>" . "\n</td>\n<td>\n" . $tags . "\n</td>\n<td>\n";
+	echo "<tr>\n<td>\n" . $row['bone_number'] . "\n</td>\n<td>\n" . $row['picture_number'] . "\n</td>\n<td>\n" . "<img id='" . $row['picture_number'] . "' src='pictures/" . $row['picture_number'] . ".JPG' height='346px' width='461px'>" . "\n</td>\n<td>\n" . $tags . "\n</td>\n<td>\n";
 	echo "<button class='btn'>Edit Tags</button>
 									<div class='modal'>
 									<form method='post' action='view_picture.php'>
